@@ -16,7 +16,27 @@ deploy step.
 | `site/styles.css` | All styling, tokenised for light/dark/system |
 | `site/app.js` | `renderApp()` plus the live page's editor and publish path |
 | `site/build.js` | Renders `site/index.html` from the three files above |
-| `site/index.html` | Generated — this is what gets published |
+| `site/index.html` | Generated — the fragment the Artifact host wraps |
+| `index.html` | Generated — standalone page, served by GitHub Pages |
+
+## Publishing to everyone
+
+The Artifact copy is shared by link, but that share is pinned to a version:
+publishing a new one does not move the pin, so viewers keep seeing the old
+page. GitHub Pages has no such pin — it serves whatever is on the default
+branch. Two one-time settings changes turn it on:
+
+1. **Settings → General → Danger Zone → Change visibility → Public.**
+   Pages on a private repo needs a paid GitHub plan.
+2. **Settings → Pages → Source: Deploy from a branch**, branch
+   `claude/instant-website-deployment-a3zjdu`, folder `/ (root)`.
+
+The site is then live at `https://fastlifeglory.github.io/glory/` and
+redeploys on every push — nothing to re-share.
+
+Off the Artifact host `window.claude` does not exist, so `claude.use()` never
+resolves and the in-page editor stays hidden. The Pages copy is static; content
+changes go through `state.json` and a rebuild.
 
 ## Building
 

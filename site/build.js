@@ -25,12 +25,15 @@ const FONTS =
 const state = JSON.parse(read('state.json'));
 const close = '<' + '/script>';
 
-const html = [
+const head = [
   '<title>Fast Life Glory</title>',
   '<link rel="preconnect" href="https://fonts.googleapis.com">',
   '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
   '<link id="fonts" rel="stylesheet" href="' + FONTS.replace(/&/g, '&amp;') + '">',
-  '<style id="sheet">' + read('styles.css') + '</style>',
+  '<style id="sheet">' + read('styles.css') + '</style>'
+].join('\n');
+
+const body = [
   '<div id="app">' + renderApp(state) + '</div>',
   '<script type="application/json" id="state">' +
     JSON.stringify(state).replace(/</g, '\\u003c') + close,
@@ -38,5 +41,28 @@ const html = [
   ''
 ].join('\n');
 
-fs.writeFileSync(path.join(dir, 'index.html'), html);
-console.log('wrote site/index.html (' + html.length + ' bytes)');
+/* The Artifact host wraps the file in its own <html>/<head>/<body>, so it
+   takes the bare fragment. */
+const fragment = head + '\n' + body;
+fs.writeFileSync(path.join(dir, 'index.html'), fragment);
+console.log('wrote site/index.html   (fragment, ' + fragment.length + ' bytes)');
+
+/* GitHub Pages serves the file as-is, so it needs a whole document. The
+   editor hides itself there: window.claude does not exist off the Artifact
+   host, so claude.use() never resolves and the page stays static. */
+const page = [
+  '<!doctype html>',
+  '<html lang="en">',
+  '<head>',
+  '<meta charset="utf-8">',
+  '<meta name="viewport" content="width=device-width, initial-scale=1">',
+  '<meta name="description" content="Links for Glory.">',
+  head,
+  '</head>',
+  '<body>',
+  body + '</body>',
+  '</html>',
+  ''
+].join('\n');
+fs.writeFileSync(path.join(__dirname, '..', 'index.html'), page);
+console.log('wrote index.html        (standalone, ' + page.length + ' bytes)');
